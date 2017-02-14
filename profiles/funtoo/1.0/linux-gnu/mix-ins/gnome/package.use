@@ -1,26 +1,50 @@
-# Required by gnome for a more complete experience.
+# enable threads USE for dev-libs/boehm-gc as wanted by gnome ebuilds
+dev-libs/boehm-gc threads
+
+# enable client USE for samba
+net-fs/samba client
+
+# QA-459. gegl needs cairo and raw USE's
+media-libs/gegl cairo raw
+
+# for gnome-3.20
+>=virtual/libintl-0-r2 abi_x86_32
+>=dev-libs/libpcre-8.39 abi_x86_32
+>=media-video/totem-3.18.0 python_single_target_python2_7 -python_single_target_python3_4 -python_single_target_python3_5
+x11-wm/mutter -kms deprecated-background
+
+# for 3.16
+>=media-libs/clutter-1.22.4 egl
+>=www-servers/apache-2.4.16 apache2_mpms_prefork apache2_modules_auth_digest
+>=gnome-base/gnome-control-center-3.16.3 networkmanager
+
+# FL-1940: prefer gstreamer for app-misc/tracker
+app-misc/tracker -ffmpeg
+
+# Required by GNOME 3.14 (extras) for a clean emerge.
+app-crypt/gcr vala
+app-emulation/qemu spice
+media-plugins/grilo-plugins upnp-av
+
+# Required by GNOME 3.14 (base) for a clean emerge.
+media-libs/cogl gles2
+media-libs/mesa gles2
+virtual/notification-daemon
+x11-libs/libxcb xkb
+
+# Required by GNOME for a more complete experience.
 app-editors/gedit spell
 gnome-base/gnome accessibility
 gnome-base/nautilus sendto
+gnome-extra/nm-applet bluetooth modemmanager
 mail-client/evolution spell
 net-im/empathy spell
+net-misc/networkmanager bluetooth connection-sharing consolekit upower wifi
 
-# Required by gnome for a clean emerge.
+# Required by GNOME for a clean emerge.
 gnome-base/gvfs udisks
 media-libs/grilo playlist
-net-misc/networkmanager modemmanager
-www-servers/apache apache2_modules_auth_digest
-
-# Required for background transparency support, FL-1373
-x11-terms/gnome-terminal deprecated
-
-# Required for pm-utils support.
-sys-power/upower deprecated
-gnome-base/gnome-control-center deprecated
-gnome-base/gnome-session deprecated
-gnome-base/gnome-settings-daemon deprecated
-gnome-base/gnome-shell deprecated
-net-im/telepathy-mission-control deprecated
+net-misc/networkmanager modemmanager ppp
 
 # eds is a problematic flag, causing many package to fail. It does allow
 # to build gnome clean but leading to pidgin failures. FL-347

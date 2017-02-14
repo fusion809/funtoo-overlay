@@ -4,40 +4,32 @@
 # the versions of ebuilds in the target portage tree. Any higher versions in the 
 # target Portage tree will be printed to stdout.
 
-# Run this script from the root of the funtoo-overlay tree, specifying the target
-# tree to compare against as an argument.
-
 import portage.versions
 import os,sys
 import subprocess
 import json
 
 from merge_utils import *
-# this causes the funtoo overlay to be updated
-funtoo_overlay = Tree("funtoo-overlay", branch, "repos@git.funtoo.org:funtoo-overlay.git", pull=True)
-
 dirpath = os.path.dirname(os.path.realpath(__file__))
-portdir = os.path.normpath("/var/git/source-trees/funtoo-overlay")
 
-print("List of differences between funtoo-overlay and gentoo")
-print("=====================================================")
+print("List of differences between funtoo and gentoo")
+print("=============================================")
 
 def getKeywords(portdir, ebuild, warn):
 	a = subprocess.getstatusoutput(dirpath + "/keywords.sh %s %s" % ( portdir, ebuild ) )
 	if a[0] == 0:
 		my_set = set(a[1].split())
-		if warn and len(my_set) == 0:
-			print("WARNING: ebuild %s has no keywords" % ebuild)
 		return (0, my_set)
 	else:
 		return a
 	
 
-if len(sys.argv) != 2:
-	print("Please specify portage tree to compare against as first argument.")
+if len(sys.argv) != 3:
+	print("Please specify funtoo tree as first argument, gentoo tree as second argument.")
 	sys.exit(1)
 
-gportdir=sys.argv[1]
+gportdir=sys.argv[2]
+portdir=sys.argv[1]
 
 def filterOnKeywords(portdir, ebuilds, keywords, warn=False):
 	""" 
@@ -79,8 +71,6 @@ def get_cpv_in_portdir(portdir,cat,pkg):
 	files = os.listdir("%s/%s/%s" % (portdir, cat, pkg))
 	ebuilds = []
 	for file in files:
-		if file[-12:] == "-9999.ebuild":
-			continue
 		if file[-7:] == ".ebuild":
 			ebuilds.append("%s/%s" % (cat, file[:-7]))
 	return ebuilds
@@ -101,7 +91,7 @@ def version_compare(portdir,gportdir,keywords,label):
 			continue
 		for pkg in os.listdir(os.path.join(portdir,cat)):
 			ebuilds = get_cpv_in_portdir(portdir,cat,pkg)
-			gebuilds = get_cpv_in_portdir(gportdir,cat,pkg)
+			gebuilds =get_cpv_in_portdir(gportdir,cat,pkg)
 			ebuilds = filterOnKeywords(portdir, ebuilds, keywords, warn=True)
 
 			if len(ebuilds) == 0:
@@ -125,12 +115,14 @@ def version_compare(portdir,gportdir,keywords,label):
 			gps = list(portage.versions.catpkgsplit(gbest))[1:]
 			gps[-1] = "r0"
 			fps[-1] = "r0"
+			if gps[-2] in [ "9999", "99999", "999999", "9999999", "99999999"]:
+				continue
 			mycmp = portage.versions.pkgcmp(fps, gps)
 			if mycmp == -1:
 				json_out[label].append("%s/%s %s %s" % (cat, pkg, gbest[len(cat)+len(pkg)+2:], fbest[len(cat)+len(pkg)+2:]))
 				print("%s (vs. %s in funtoo)" % ( gbest, fbest ))
 json_out={}
-for keyw in [ "~amd64", "~x86" ]:
+for keyw in [ "~amd64" ]:
 	if keyw == "~x86":
 		label = "fcx8632"
 	elif keyw == "~amd64":
@@ -145,6 +137,7 @@ for keyw in [ "~amd64", "~x86" ]:
 
 	version_compare(portdir,gportdir,keyw,label)
 for key in json_out:
+	json_out[key].sort()
 	json_out[key] = ",".join(json_out[key])
 jsonfile = "/home/ports/public_html/my.json"
 a = open(jsonfile, 'w')

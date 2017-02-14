@@ -1,6 +1,6 @@
 # Distributed under the terms of the GNU General Public License v2
 
-EAPI=5
+EAPI="5"
 
 inherit eutils multilib linux-info linux-mod toolchain-funcs versionator pax-utils
 
@@ -8,15 +8,14 @@ DESCRIPTION="Ati precompiled drivers for Radeon Evergreen (HD5000 Series) and ne
 HOMEPAGE="http://www.amd.com"
 RUN="${WORKDIR}/amd-catalyst-13.12-linux-x86.x86_64.run"
 SLOT="1"
-DRIVERS_URI="http://ftp.osuosl.org/pub/funtoo/distfiles/amd-catalyst-13.12-linux-x86.x86_64.zip"
+DRIVERS_URI="mirror://gentoo/amd-catalyst-13.12-linux-x86.x86_64.zip mirror://funtoo/amd-catalyst-13.12-linux-x86.x86_64.zip"
 XVBA_SDK_URI="http://developer.amd.com/wordpress/media/2012/10/xvba-sdk-0.74-404001.tar.gz"
 SRC_URI="${DRIVERS_URI} ${XVBA_SDK_URI}"
 FOLDER_PREFIX="common/"
-RESTRICT="mirror"
-IUSE="+vaapi debug +modules multilib qt4 static-libs pax_kernel"
+IUSE="+vaapi debug +modules abi_x86_32 qt4 static-libs pax_kernel"
 
 LICENSE="AMD GPL-2 QPL-1.0"
-KEYWORDS="-* amd64 x86"
+KEYWORDS="*"
 
 RESTRICT="bindist test"
 
@@ -24,8 +23,8 @@ RESTRICT="bindist test"
 RDEPEND="
 	!<=media-libs/cogl-1.12.2-r1
 	<=x11-base/xorg-server-1.14.49[-minimal]
-	>=app-admin/eselect-opengl-1.0.7
-	app-admin/eselect-opencl
+	>=app-eselect/eselect-opengl-1.0.7
+	app-eselect/eselect-opencl
 	sys-power/acpid
 	x11-apps/xauth
 	x11-libs/libX11
@@ -34,19 +33,12 @@ RDEPEND="
 	x11-libs/libXrandr
 	x11-libs/libXrender
 	virtual/glu
-	multilib? (
-			app-emulation/emul-linux-x86-opengl
-			|| (
-				(
-					x11-libs/libX11[abi_x86_32]
+	abi_x86_32? (	x11-libs/libX11[abi_x86_32]
 					x11-libs/libXext[abi_x86_32]
 					x11-libs/libXinerama[abi_x86_32]
 					x11-libs/libXrandr[abi_x86_32]
 					x11-libs/libXrender[abi_x86_32]
 				)
-				app-emulation/emul-linux-x86-xlibs
-			)
-	)
 	qt4? (
 			x11-libs/libICE
 			x11-libs/libSM
@@ -150,7 +142,7 @@ QA_DT_HASH="
 	usr/lib\(32\|64\)\?/OpenCL/vendors/amd/libOpenCL.so.1
 "
 
-pkg_pretend() {
+pre_src_compile() {
 	local CONFIG_CHECK="~MTRR ~!DRM ACPI PCI_MSI !LOCKDEP !PAX_KERNEXEC_PLUGIN_METHOD_OR"
 	use amd64 && CONFIG_CHECK+=" COMPAT"
 

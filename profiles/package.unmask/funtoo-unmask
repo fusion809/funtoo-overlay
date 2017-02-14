@@ -1,6 +1,21 @@
-# FL-998, FL-1100, unmask gcc-4.8.2-r1, added here, to override gentoo upstream mask
-=sys-devel/gcc-4.8.2-r1
+# FL-2493: as of 2015-06-08 gentoo-x86 including evolution and evolution-data-server ebuilds into gentoo-x86 but w# ith masks. Funtoo had this ebuilds added much earlier. We keep override unmasks here
+=mail-client/evolution-3.13.6
+=gnome-extra/evolution-data-server-3.13.6
 
-## F-447
-~sys-fs/udev-171
-~virtual/udev-171
+# Funtoo versions of Raspberry PI software should always be unmasked
+=media-libs/raspberrypi-userland-9999
+=sys-kernel/raspberrypi-image-3.18.11_pre-r20150415
+=sys-kernel/raspberrypi-image-3.18.9_pre-r20150307
+
+## FL-2101. override gentoo portage mask that also affects out portage versioning.
+=sys-apps/portage-2.3.6-r9
+
+# Override Gentoo masks
+app-backup/rdiff-backup
+app-crypt/gpgme
+app-misc/tracker
+dev-scheme/guile
+games-board/aisleriot
+media-libs/aubio
+media-libs/libmediaart
+x11-wm/metacity

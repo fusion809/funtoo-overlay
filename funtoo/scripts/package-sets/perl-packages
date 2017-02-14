@@ -1,0 +1,7 @@
+dev-perl/*
+perl-core/*
+dev-lang/perl
+@regex@:virtual/perl-.*
+@eclass@:perl-app\.eclass
+@eclass@:perl-functions\.eclass
+@eclass@:perl-module\.eclass

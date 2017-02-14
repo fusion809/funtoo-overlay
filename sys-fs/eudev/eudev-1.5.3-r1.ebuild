@@ -11,8 +11,8 @@ then
 	EGIT_REPO_URI="git://github.com/gentoo/eudev.git"
 	inherit git-2
 else
-	SRC_URI="http://dev.gentoo.org/~blueness/${PN}/${P}.tar.gz"
-	KEYWORDS="alpha amd64 arm hppa ~mips ppc ppc64 x86"
+	SRC_URI="https://dev.gentoo.org/~blueness/${PN}/${P}.tar.gz"
+	KEYWORDS="*"
 fi
 
 DESCRIPTION="Linux dynamic and persistent device naming support (aka userspace devfs)"
@@ -20,9 +20,9 @@ HOMEPAGE="https://github.com/gentoo/eudev"
 
 LICENSE="LGPL-2.1 MIT GPL-2"
 SLOT="0"
-IUSE="doc +gudev +hwdb +kmod introspection +keymap +modutils +openrc +rule-generator selinux +static-libs test"
+IUSE="doc gudev +hwdb kmod introspection +keymap +modutils +openrc +rule-generator selinux static-libs test"
 
-COMMON_DEPEND="gudev? ( dev-libs/glib:2[${MULTILIB_USEDEP}] )
+COMMON_DEPEND="gudev? ( >=dev-libs/glib-2.34.3:2[${MULTILIB_USEDEP}] )
 	kmod? ( sys-apps/kmod )
 	introspection? ( >=dev-libs/gobject-introspection-1.31.1 )
 	selinux? ( sys-libs/libselinux )
@@ -50,11 +50,12 @@ RDEPEND="${COMMON_DEPEND}
 	!sys-apps/systemd
 	!<sys-fs/lvm2-2.02.97
 	!sys-fs/device-mapper
-	!<sys-fs/udev-init-scripts-18"
+	!<sys-fs/udev-init-scripts-18
+	gudev? ( !dev-libs/libgudev )"
 
 PDEPEND="hwdb? ( >=sys-apps/hwids-20130717-r1[udev] )
 	keymap? ( >=sys-apps/hwids-20130717-r1[udev] )
-	openrc? ( >=sys-fs/udev-init-scripts-27 )"
+	openrc? ( >=sys-fs/udev-init-scripts-18 )"
 
 REQUIRED_USE="keymap? ( hwdb )"
 
@@ -203,6 +204,7 @@ multilib_src_install_all()
 	rm -rf "${ED}"/usr/share/doc/${PF}/LICENSE.*
 
 	use rule-generator && use openrc && doinitd "${FILESDIR}"/udev-postmount
+
 	# drop distributed hwdb files, they override sys-apps/hwids
 	rm -f "${ED}"/etc/udev/hwdb.d/*.hwdb
 
@@ -265,9 +267,18 @@ pkg_postinst()
 	ewarn "upgrade go into effect:"
 	ewarn "\t/etc/init.d/udev --nodeps restart"
 
+	if use rule-generator && use openrc && \
+	[[ -x $(type -P rc-update) ]] && rc-update show | grep udev-postmount | grep -qsv 'boot\|default\|sysinit'; then
+		ewarn
+		ewarn "Please add the udev-postmount init script to your default runlevel"
+		ewarn "to ensure the legacy rule-generator functionality works as reliably"
+		ewarn "as possible."
+		ewarn "\trc-update add udev-postmount default"
+	fi
+
 	elog
 	elog "For more information on eudev on Gentoo, writing udev rules, and"
 	elog "fixing known issues visit:"
-	elog "         http://www.gentoo.org/doc/en/udev-guide.xml"
+	elog "         https://www.gentoo.org/doc/en/udev-guide.xml"
 	elog
 }
